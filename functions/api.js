@@ -2,29 +2,18 @@
 const crypto = require('crypto');
 
 // ============ Конфигурация ============
-// Установите эти переменные в Netlify Dashboard (Site Settings > Environment Variables)
 const CONFIG = {
-    // Пароль доступа к приложению
     ACCESS_PASSWORD: process.env.ACCESS_PASSWORD || 'admin123',
-    
-    // Yandex GPT
     YANDEX_FOLDER_ID: process.env.YANDEX_FOLDER_ID || '',
     YANDEX_API_KEY: process.env.YANDEX_API_KEY || '',
     YANDEX_GPT_URL: 'https://llm.api.cloud.yandex.net/foundationModels/v1/completion',
     YANDEX_MODEL: 'yandexgpt-5-lite',
-    
-    // PlantUML
     PLANTUML_URL: 'https://www.plantuml.com/plantuml',
-    
-    // Сессия
     SESSION_SECRET: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
-    SESSION_MAX_AGE: 3600 * 24, // 24 часа
+    SESSION_MAX_AGE: 3600 * 24,
 };
 
 // ============ Утилиты для сессий ============
-// В Netlify Functions для хранения сессий используем простой Map
-// Внимание: при перезапуске функции сессии сбрасываются!
-// Для продакшена используйте Redis или другую базу данных.
 const sessions = new Map();
 
 function generateSessionId() {
@@ -46,7 +35,6 @@ function getSession(sessionId) {
     const session = sessions.get(sessionId);
     if (!session) return null;
     
-    // Проверка истечения срока
     if (Date.now() - session.createdAt > CONFIG.SESSION_MAX_AGE * 1000) {
         sessions.delete(sessionId);
         return null;
@@ -70,7 +58,6 @@ function deleteSession(sessionId) {
 }
 
 // ============ PlantUML кодирование ============
-// Алфавит PlantUML
 const PLANTUML_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
 const BASE64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -80,22 +67,13 @@ function encodePlantUML(plantumlCode) {
         code = `@startuml\n${code}\n@enduml`;
     }
     
-    // Сжатие deflate
-    const deflated = deflate(code);
-    
-    // Преобразование в base64 с алфавитом PlantUML
-    const base64 = Buffer.from(deflated).toString('base64');
+    const zlib = require('zlib');
+    const compressed = zlib.deflateRawSync(code, { level: 9 });
+    const base64 = Buffer.from(compressed).toString('base64');
     return base64.replace(/[A-Za-z0-9+/]/g, (match) => {
         const idx = BASE64_ALPHABET.indexOf(match);
         return idx !== -1 ? PLANTUML_ALPHABET[idx] : match;
     });
-}
-
-// Простая реализация deflate для Node.js
-function deflate(data) {
-    const zlib = require('zlib');
-    const compressed = zlib.deflateRawSync(data, { level: 9 });
-    return compressed;
 }
 
 function generatePlantUMLUrl(plantumlCode) {
@@ -208,7 +186,6 @@ deactivate Web
         if (data.result && data.result.alternatives && data.result.alternatives.length > 0) {
             let code = data.result.alternatives[0].message.text;
             
-            // Очистка кода от маркеров markdown
             code = code.trim();
             if (code.startsWith('```plantuml') || code.startsWith('```')) {
                 const lines = code.split('\n');
@@ -235,7 +212,8 @@ exports.handler = async (event, context) => {
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type, Cookie',
+        'Access-Control-Allow-Credentials': 'true',
         'Content-Type': 'application/json',
     };
     
@@ -245,7 +223,16 @@ exports.handler = async (event, context) => {
     }
     
     // Получение или создание сессии
-    let sessionId = event.headers.cookie?.match(/sessionId=([^;]+)/)?.[1];
+    let sessionId = null;
+    
+    // Проверяем cookie
+    if (event.headers.cookie) {
+        const cookieMatch = event.headers.cookie.match(/sessionId=([^;]+)/);
+        if (cookieMatch) {
+            sessionId = cookieMatch[1];
+        }
+    }
+    
     let session = null;
     
     if (sessionId) {
@@ -256,11 +243,19 @@ exports.handler = async (event, context) => {
         sessionId = createSession();
         session = getSession(sessionId);
         // Устанавливаем cookie
-        headers['Set-Cookie'] = `sessionId=${sessionId}; HttpOnly; Path=/; Max-Age=${CONFIG.SESSION_MAX_AGE}`;
+        headers['Set-Cookie'] = `sessionId=${sessionId}; HttpOnly; Path=/; Max-Age=${CONFIG.SESSION_MAX_AGE}; SameSite=Lax`;
     }
     
     const action = event.queryStringParameters?.action || '';
-    const body = event.body ? JSON.parse(event.body) : {};
+    let body = {};
+    
+    try {
+        if (event.body) {
+            body = JSON.parse(event.body);
+        }
+    } catch (e) {
+        // Если тело не JSON, игнорируем
+    }
     
     try {
         // ============ Проверка авторизации ============
@@ -295,7 +290,7 @@ exports.handler = async (event, context) => {
         // ============ Логаут ============
         if (action === 'logout') {
             deleteSession(sessionId);
-            headers['Set-Cookie'] = `sessionId=; HttpOnly; Path=/; Max-Age=0`;
+            headers['Set-Cookie'] = `sessionId=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax`;
             return {
                 statusCode: 200,
                 headers,

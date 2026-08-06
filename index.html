@@ -5,370 +5,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        * {
-            box-sizing: border-box;
-        }
-        
-        body { 
-            font-family: Arial, sans-serif; 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            background: #f8f9fa;
-        }
-        
-        h1 { 
-            color: #2c3e50; 
-            border-bottom: 3px solid #007bff; 
-            padding-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            max-width: 400px;
-            width: 90%;
-            animation: fadeIn 0.3s;
-        }
-        
-        .login-box h2 {
-            margin-top: 0;
-            color: #2c3e50;
-            text-align: center;
-        }
-        
-        .login-box p {
-            color: #6c757d;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        
-        .login-box input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
-        
-        .login-box input:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
-        }
-        
-        .login-box .btn {
-            width: 100%;
-            margin-top: 15px;
-        }
-        
-        .login-error {
-            color: #dc3545;
-            background: #f8d7da;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 15px;
-            display: none;
-            text-align: center;
-        }
-        
-        .description-area {
-            width: 100%;
-            height: 150px;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            resize: vertical;
-            transition: border-color 0.3s;
-        }
-        
-        .description-area:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
-        }
-        
-        .description-area:disabled {
-            background: #e9ecef;
-            cursor: not-allowed;
-        }
-        
-        .button-group {
-            margin: 15px 0;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary {
-            background: #007bff;
-            color: white;
-        }
-        
-        .btn-primary:hover:not(:disabled) {
-            background: #0056b3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
-        }
-        
-        .btn-primary:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #218838;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .user-badge {
-            background: #e7f3ff;
-            color: #007bff;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        
-        .result {
-            margin-top: 30px;
-            display: none;
-            animation: fadeIn 0.5s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .tab {
-            display: flex;
-            gap: 5px;
-            margin: 15px 0;
-            border-bottom: 2px solid #dee2e6;
-        }
-        
-        .tab button {
-            padding: 10px 20px;
-            background: transparent;
-            color: #6c757d;
-            border: none;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .tab button:hover {
-            color: #007bff;
-        }
-        
-        .tab button.active {
-            color: #007bff;
-            border-bottom-color: #007bff;
-        }
-        
-        .tab-content {
-            padding: 20px 0;
-        }
-        
-        .code-section {
-            background: #1e1e1e;
-            padding: 20px;
-            border-radius: 8px;
-            overflow-x: auto;
-            position: relative;
-        }
-        
-        .code-section pre {
-            margin: 0;
-            color: #d4d4d4;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        
-        .code-section code {
-            color: #d4d4d4;
-        }
-        
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
-        }
-        
-        .copy-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        
-        .diagram-section {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            text-align: center;
-            min-height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .diagram-section img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-        }
-        
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        
-        .info-box {
-            background: #e7f3ff;
-            border-left: 4px solid #007bff;
-            padding: 12px 16px;
-            margin: 15px 0;
-            border-radius: 4px;
-            color: #004085;
-        }
-        
-        .error-box {
-            background: #f8d7da;
-            border-left: 4px solid #dc3545;
-            padding: 12px 16px;
-            margin: 15px 0;
-            border-radius: 4px;
-            color: #721c24;
-            display: none;
-        }
-        
-        .diagram-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            flex-wrap: wrap;
-        }
-        
-        .badge {
-            background: #007bff;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .status-text {
-            color: #6c757d;
-            font-size: 14px;
-        }
-        
-        @media (max-width: 768px) {
-            body { padding: 10px; }
-            .container { padding: 15px; }
-            .button-group { flex-direction: column; }
-            .btn { width: 100%; }
-            .login-box { padding: 20px; }
-            h1 { flex-direction: column; gap: 10px; }
-            .header-buttons { width: 100%; justify-content: center; }
-        }
+        /* Все стили остаются без изменений */
+        * { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background: #f8f9fa; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #007bff; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); max-width: 400px; width: 90%; animation: fadeIn 0.3s; }
+        .login-box h2 { margin-top: 0; color: #2c3e50; text-align: center; }
+        .login-box p { color: #6c757d; text-align: center; margin-bottom: 25px; }
+        .login-box input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; box-sizing: border-box; transition: border-color 0.3s; }
+        .login-box input:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+        .login-box .btn { width: 100%; margin-top: 15px; }
+        .login-error { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 4px; margin-top: 15px; display: none; text-align: center; }
+        .description-area { width: 100%; height: 150px; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical; transition: border-color 0.3s; }
+        .description-area:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+        .description-area:disabled { background: #e9ecef; cursor: not-allowed; }
+        .button-group { margin: 15px 0; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover:not(:disabled) { background: #0056b3; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,123,255,0.3); }
+        .btn-primary:disabled { background: #6c757d; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .header-buttons { display: flex; gap: 10px; align-items: center; }
+        .user-badge { background: #e7f3ff; color: #007bff; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+        .result { margin-top: 30px; display: none; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .tab { display: flex; gap: 5px; margin: 15px 0; border-bottom: 2px solid #dee2e6; }
+        .tab button { padding: 10px 20px; background: transparent; color: #6c757d; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s; }
+        .tab button:hover { color: #007bff; }
+        .tab button.active { color: #007bff; border-bottom-color: #007bff; }
+        .tab-content { padding: 20px 0; }
+        .code-section { background: #1e1e1e; padding: 20px; border-radius: 8px; overflow-x: auto; position: relative; }
+        .code-section pre { margin: 0; color: #d4d4d4; font-family: 'Consolas', 'Courier New', monospace; font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
+        .code-section code { color: #d4d4d4; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+        .copy-btn:hover { background: rgba(255,255,255,0.2); }
+        .diagram-section { background: white; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; text-align: center; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+        .diagram-section img { max-width: 100%; height: auto; border-radius: 4px; }
+        .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; vertical-align: middle; }
+        .info-box { background: #e7f3ff; border-left: 4px solid #007bff; padding: 12px 16px; margin: 15px 0; border-radius: 4px; color: #004085; }
+        .error-box { background: #f8d7da; border-left: 4px solid #dc3545; padding: 12px 16px; margin: 15px 0; border-radius: 4px; color: #721c24; display: none; }
+        .diagram-info { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; flex-wrap: wrap; }
+        .badge { background: #007bff; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-text { color: #6c757d; font-size: 14px; }
+        @media (max-width: 768px) { body { padding: 10px; } .container { padding: 15px; } .button-group { flex-direction: column; } .btn { width: 100%; } .login-box { padding: 20px; } h1 { flex-direction: column; gap: 10px; } .header-buttons { width: 100%; justify-content: center; } }
     </style>
 </head>
 <body>
@@ -473,7 +160,9 @@
         // Проверка статуса авторизации
         async function checkAuth() {
             try {
-                const response = await fetch('/.netlify/functions/api?action=check');
+                const response = await fetch('/.netlify/functions/api?action=check', {
+                    credentials: 'include'  // Важно для передачи cookies
+                });
                 const data = await response.json();
                 if (data.authenticated) {
                     setAuthenticated(true);
@@ -503,6 +192,7 @@
                 const response = await fetch('/.netlify/functions/api?action=login', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',  // Важно для передачи cookies
                     body: JSON.stringify({ password: password.trim() })
                 });
                 
@@ -527,7 +217,10 @@
         // Выход
         async function logout() {
             try {
-                await fetch('/.netlify/functions/api?action=logout', { method: 'POST' });
+                await fetch('/.netlify/functions/api?action=logout', { 
+                    method: 'POST',
+                    credentials: 'include' 
+                });
                 setAuthenticated(false);
                 document.getElementById('loginOverlay').style.display = 'flex';
                 document.getElementById('passwordInput').focus();
@@ -580,7 +273,6 @@
             const resultDiv = document.getElementById('result');
             resultDiv.style.display = 'block';
             
-            // Показываем загрузку
             document.getElementById('loading-placeholder').style.display = 'block';
             document.getElementById('diagram-image').style.display = 'none';
             document.getElementById('no-diagram-message').style.display = 'none';
@@ -589,6 +281,7 @@
                 const response = await fetch('/.netlify/functions/api?action=generate', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
                     body: JSON.stringify({ description: description.trim() })
                 });
                 
@@ -610,21 +303,17 @@
                 
                 currentCode = data.plantuml_code;
                 
-                // Отображаем диаграмму
                 const img = document.getElementById('diagram-image');
                 img.src = data.image_url + '?t=' + Date.now();
                 img.style.display = 'block';
                 document.getElementById('loading-placeholder').style.display = 'none';
                 document.getElementById('no-diagram-message').style.display = 'none';
                 
-                // Отображаем код
                 document.getElementById('plantuml-code').textContent = data.plantuml_code;
                 
-                // Показываем вкладку диаграммы
                 document.getElementById('diagram-tab').style.display = 'block';
                 document.getElementById('code-tab').style.display = 'none';
                 
-                // Активируем кнопку диаграммы
                 document.querySelectorAll('.tab button').forEach(btn => btn.classList.remove('active'));
                 document.querySelector('.tab button:first-child').classList.add('active');
                 
@@ -658,6 +347,7 @@
                 const response = await fetch('/.netlify/functions/api?action=render', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
                     body: JSON.stringify({ code: currentCode })
                 });
                 
@@ -677,14 +367,12 @@
                     return;
                 }
                 
-                // Обновляем изображение
                 const img = document.getElementById('diagram-image');
                 img.src = data.image_url + '?t=' + Date.now();
                 img.style.display = 'block';
                 document.getElementById('loading-placeholder').style.display = 'none';
                 document.getElementById('no-diagram-message').style.display = 'none';
                 
-                // Переключаемся на вкладку диаграммы
                 showTab('diagram');
                 
             } catch (error) {
