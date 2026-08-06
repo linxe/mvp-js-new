@@ -212,8 +212,7 @@ exports.handler = async (event, context) => {
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Cookie',
-        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Headers': 'Content-Type, X-Session-Id',
         'Content-Type': 'application/json',
     };
     
@@ -222,33 +221,22 @@ exports.handler = async (event, context) => {
         return { statusCode: 204, headers };
     }
     
-    // Получение или создание сессии
-    let sessionId = null;
-    
-    // Проверяем cookie
-    if (event.headers.cookie) {
-        const cookieMatch = event.headers.cookie.match(/sessionId=([^;]+)/);
-        if (cookieMatch) {
-            sessionId = cookieMatch[1];
-        }
-    }
-    
+    // --- УПРАВЛЕНИЕ СЕССИЕЙ ---
+    let sessionId = event.headers['x-session-id'];
     let session = null;
-    
+
     if (sessionId) {
         session = getSession(sessionId);
     }
-    
+
     if (!session) {
         sessionId = createSession();
         session = getSession(sessionId);
-        // Устанавливаем cookie
-        headers['Set-Cookie'] = `sessionId=${sessionId}; HttpOnly; Path=/; Max-Age=${CONFIG.SESSION_MAX_AGE}; SameSite=Lax`;
+        headers['X-Session-Id'] = sessionId;
     }
     
-    const action = event.queryStringParameters?.action || '';
+    // --- ОБРАБОТКА ТЕЛА ЗАПРОСА ---
     let body = {};
-    
     try {
         if (event.body) {
             body = JSON.parse(event.body);
@@ -256,6 +244,8 @@ exports.handler = async (event, context) => {
     } catch (e) {
         // Если тело не JSON, игнорируем
     }
+    
+    const action = event.queryStringParameters?.action || '';
     
     try {
         // ============ Проверка авторизации ============
@@ -290,7 +280,7 @@ exports.handler = async (event, context) => {
         // ============ Логаут ============
         if (action === 'logout') {
             deleteSession(sessionId);
-            headers['Set-Cookie'] = `sessionId=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax`;
+            headers['X-Session-Id'] = '';
             return {
                 statusCode: 200,
                 headers,
