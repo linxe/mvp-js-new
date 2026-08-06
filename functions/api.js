@@ -64,7 +64,7 @@ const BASE64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012
 function encodePlantUML(plantumlCode) {
     let code = plantumlCode.trim();
     if (!code.startsWith('@startuml')) {
-        code = `@startuml\n${code}\n@enduml`;
+        code = '@startuml\n' + code + '\n@enduml';
     }
     
     const zlib = require('zlib');
@@ -78,7 +78,7 @@ function encodePlantUML(plantumlCode) {
 
 function generatePlantUMLUrl(plantumlCode) {
     const encoded = encodePlantUML(plantumlCode);
-    return `${CONFIG.PLANTUML_URL}/png/${encoded}`;
+    return CONFIG.PLANTUML_URL + '/png/' + encoded;
 }
 
 // ============ Yandex GPT Client ============
@@ -89,70 +89,58 @@ async function generatePlantUML(description) {
         throw new Error('Yandex GPT credentials not configured');
     }
     
-    const prompt = `Ты — эксперт по PlantUML. Создай корректный код на PlantUML для UML sequence-диаграммы на основе следующего описания:
-
-ОПИСАНИЕ USE CASE:
-${description}
-
-ТРЕБОВАНИЯ К ДИАГРАММЕ:
-1. Используй синтаксис PlantUML для sequence-диаграмм
-2. Покажи всех участников взаимодействия:
-   - Пользователи (actor)
-   - Веб-приложения (participant)
-   - Backend сервисы (participant)
-   - Базы данных (database)
-   - Брокеры сообщений (queue)
-   - Внешние системы (participant)
-
-3. Правила создания диаграммы:
-   - Все участники должны быть объявлены в начале диаграммы
-   - Используй бары активации (activate/deactivate) для всех компонентов
-   - При self-вызове создавай вложенный бар активации
-   - Для запросов используй стрелки ->
-   - Для ответов используй пунктирные стрелки -->
-   - Подписывай стрелки действиями и методами API
-
-4. Пример корректного синтаксиса:
-@startuml
-actor "Пользователь" as User
-participant "Веб-приложение" as Web
-participant "Backend" as Backend
-database "База данных" as DB
-
-User -> Web: Отправить запрос
-activate Web
-
-Web -> Backend: POST /api/process
-activate Backend
-
-Backend -> DB: SELECT * FROM users
-activate DB
-DB --> Backend: Данные пользователя
-deactivate DB
-
-Backend -> Backend: Валидация данных
-activate Backend
-deactivate Backend
-
-Backend --> Web: Ответ с данными
-deactivate Backend
-
-Web --> User: Отобразить результат
-deactivate Web
-@enduml
-
-ВАЖНЫЕ ПРАВИЛА:
-- Каждый activate должен иметь соответствующий deactivate
-- Не используй символы '```' в ответе
-- Не добавляй пояснения вне кода
-- Код должен начинаться с @startuml и заканчиваться @enduml
-- Убедись, что все стрелки имеют текстовые подписи
-- Используй описательные имена для участников
-
-Сгенерируй только PlantUML код, без дополнительного текста.`;
+    const prompt = 'Ты — эксперт по PlantUML. Создай корректный код на PlantUML для UML sequence-диаграммы на основе следующего описания:\n\n' +
+        'ОПИСАНИЕ USE CASE:\n' +
+        description + '\n\n' +
+        'ТРЕБОВАНИЯ К ДИАГРАММЕ:\n' +
+        '1. Используй синтаксис PlantUML для sequence-диаграмм\n' +
+        '2. Покажи всех участников взаимодействия:\n' +
+        '   - Пользователи (actor)\n' +
+        '   - Веб-приложения (participant)\n' +
+        '   - Backend сервисы (participant)\n' +
+        '   - Базы данных (database)\n' +
+        '   - Брокеры сообщений (queue)\n' +
+        '   - Внешние системы (participant)\n\n' +
+        '3. Правила создания диаграммы:\n' +
+        '   - Все участники должны быть объявлены в начале диаграммы\n' +
+        '   - Используй бары активации (activate/deactivate) для всех компонентов\n' +
+        '   - При self-вызове создавай вложенный бар активации\n' +
+        '   - Для запросов используй стрелки ->\n' +
+        '   - Для ответов используй пунктирные стрелки -->\n' +
+        '   - Подписывай стрелки действиями и методами API\n\n' +
+        '4. Пример корректного синтаксиса:\n' +
+        '@startuml\n' +
+        'actor "Пользователь" as User\n' +
+        'participant "Веб-приложение" as Web\n' +
+        'participant "Backend" as Backend\n' +
+        'database "База данных" as DB\n\n' +
+        'User -> Web: Отправить запрос\n' +
+        'activate Web\n\n' +
+        'Web -> Backend: POST /api/process\n' +
+        'activate Backend\n\n' +
+        'Backend -> DB: SELECT * FROM users\n' +
+        'activate DB\n' +
+        'DB --> Backend: Данные пользователя\n' +
+        'deactivate DB\n\n' +
+        'Backend -> Backend: Валидация данных\n' +
+        'activate Backend\n' +
+        'deactivate Backend\n\n' +
+        'Backend --> Web: Ответ с данными\n' +
+        'deactivate Backend\n\n' +
+        'Web --> User: Отобразить результат\n' +
+        'deactivate Web\n' +
+        '@enduml\n\n' +
+        'ВАЖНЫЕ ПРАВИЛА:\n' +
+        '- Каждый activate должен иметь соответствующий deactivate\n' +
+        '- Не используй символы "```" в ответе\n' +
+        '- Не добавляй пояснения вне кода\n' +
+        '- Код должен начинаться с @startuml и заканчиваться @enduml\n' +
+        '- Убедись, что все стрелки имеют текстовые подписи\n' +
+        '- Используй описательные имена для участников\n\n' +
+        'Сгенерируй только PlantUML код, без дополнительного текста.';
 
     const payload = {
-        modelUri: `gpt://${YANDEX_FOLDER_ID}/${YANDEX_MODEL}`,
+        modelUri: 'gpt://' + YANDEX_FOLDER_ID + '/' + YANDEX_MODEL,
         completionOptions: {
             stream: false,
             temperature: 0.2,
@@ -164,7 +152,7 @@ deactivate Web
     };
     
     const headers = {
-        'Authorization': `Api-Key ${YANDEX_API_KEY}`,
+        'Authorization': 'Api-Key ' + YANDEX_API_KEY,
         'x-folder-id': YANDEX_FOLDER_ID,
         'Content-Type': 'application/json',
     };
@@ -178,7 +166,7 @@ deactivate Web
         
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Yandex GPT API error: ${response.status} ${errorText}`);
+            throw new Error('Yandex GPT API error: ' + response.status + ' ' + errorText);
         }
         
         const data = await response.json();
@@ -213,6 +201,7 @@ exports.handler = async (event, context) => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, X-Session-Id',
+        'Access-Control-Expose-Headers': 'X-Session-Id',
         'Content-Type': 'application/json',
     };
     
