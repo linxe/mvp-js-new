@@ -1,0 +1,17 @@
+{
+  "name": "uml-diagram-generator",
+  "version": "1.0.0",
+  "description": "UML Sequence Diagram Generator with YandexGPT",
+  "main": "index.html",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "@netlify/functions": "^2.0.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  }
+}
